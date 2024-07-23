@@ -1,0 +1,165 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.sql.*;
+
+public class RegistrationForm extends JFrame implements ActionListener
+{
+	// Components of the form
+	private Container container;
+	private JLabel title, idLabel, nameLabel, genderLabel, addressLabel,contactLabel;
+	private JTextField idField, nameField, addressField, contactField;
+	private JRadioButton male,female;
+	private ButtonGroup genderGroup;
+	private JButton submitButton,exitButton;
+
+	// Database credentials
+	private static final String DB_URL = "jdbc:mysql://localhost:3306/registration";
+	private static final String DB_USER = "root";
+	private static final String DB_PASSWORD	 = "password";
+	
+	public RegistrationForm() {
+		setTitle("Resgitration Form");
+		setBounds(300, 90,600,400);
+		setDefaultCloseOperation(EXIT_ON_CLOSE);
+		setResizable(false);
+		
+		container = getContentPane();
+		container.setLayout(null);
+		
+		title = new JLabel("Registration Form");
+		title.setFont(new Font("Arial",Font.PLAIN,30));
+		title.setSize(300,30);
+		title.setLocation(200,30);
+		container.add(title);
+		
+		idLabel = new JLabel("ID");
+		idLabel.setFont(new Font("Arial",Font.PLAIN,20));
+		idLabel.setSize(100,20);
+		idLabel.setLocation(100,100);
+		container.add(idLabel);
+		
+		idField = new JTextField();
+		idField.setFont(new Font("Arial",Font.PLAIN,15));    
+		idField.setSize(190,20);
+		idField.setLocation(200,100);
+		container.add(idField);
+		
+		nameLabel = new JLabel("Name");
+		nameLabel.setFont(new Font("Arial",Font.PLAIN,20));   
+		nameLabel.setSize(100,20);
+		nameLabel.setLocation(100,150);
+		container.add(nameLabel);
+		
+		nameField = new JTextField();
+		nameField.setFont(new Font("Arial",Font.PLAIN,15));
+		nameField.setSize(190,20);
+		nameField.setLocation(200,150);
+		container.add(nameField);
+		
+		genderLabel = new JLabel("Gender");
+		genderLabel.setFont(new Font("Arial",Font.PLAIN,20));
+		genderLabel.setSize(100,20);
+		nameField.setLocation(100,200);
+		container.add(genderLabel);
+		
+		male = new JRadioButton("Male");
+		male.setFont(new Font("Arial",Font.PLAIN,15));
+		male.setSelected(true);
+		male.setSize(75,20);	
+		male.setLocation(200,200);
+		container.add(male);
+		
+		female = new JRadioButton("Female");
+		female.setFont(new Font("Arial", Font.PLAIN, 15));
+		female.setSize(80,20);
+		female.setLocation(275,200);
+		container.add(female);
+		
+		genderGroup = new ButtonGroup();
+		genderGroup.add(male);
+		genderGroup.add(female);
+		
+		addressLabel = new JLabel("Address");
+		addressLabel.setFont(new Font("Arial",Font.PLAIN,20));
+		addressLabel.setSize(100, 20);
+        addressLabel.setLocation(100, 250);
+        container.add(addressLabel);
+        
+        addressField = new JTextField();
+        addressField.setFont(new Font("Arial", Font.PLAIN, 15));
+        addressField.setSize(190, 20);
+        addressField.setLocation(200, 250);
+        container.add(addressField);
+        
+        contactLabel = new JLabel("Contact");
+        contactLabel.setFont(new Font("Arial", Font.PLAIN, 20));
+        contactLabel.setSize(100, 20);
+        contactLabel.setLocation(100, 300);
+        container.add(contactLabel);
+        
+        contactField = new JTextField();
+        contactField.setFont(new Font("Arial", Font.PLAIN, 15));
+        contactField.setSize(190, 20);
+        contactField.setLocation(200, 300);
+        container.add(contactField);
+        
+        submitButton = new JButton("Register");
+        submitButton.setFont(new Font("Arial", Font.PLAIN, 15));
+        submitButton.setSize(100, 20);
+        submitButton.setLocation(150, 350);
+        submitButton.addActionListener(this);
+        container.add(submitButton);
+        
+        exitButton = new JButton("Exit");
+        exitButton.setFont(new Font("Arial",Font.PLAIN,15));
+        exitButton.setSize(100,20);
+        exitButton.setLocation(300,350);
+        exitButton.addActionListener(this);
+        container.add(exitButton);
+        
+        setVisible(true);
+	}
+	
+	 // method to insert data into database
+    public void insertData(int id, String name, String gender, String address, String contact) {
+        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+             PreparedStatement pstmt = conn.prepareStatement("INSERT INTO users (id, name, gender, address, contact) VALUES (?, ?, ?, ?, ?)")) {
+
+            pstmt.setInt(1, id);
+            pstmt.setString(2, name);
+            pstmt.setString(3, gender);
+            pstmt.setString(4, address);
+            pstmt.setString(5, contact);
+
+            pstmt.executeUpdate();
+            JOptionPane.showMessageDialog(this, "Registered successfully!");
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Failed to register!", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        if (e.getSource() == submitButton) {
+            int id = Integer.parseInt(idField.getText());
+            String name = nameField.getText();
+            String gender = male.isSelected() ? "Male" : "Female";
+            String address = addressField.getText();
+            String contact = contactField.getText();
+
+            insertData(id, name, gender, address, contact);
+
+        } else if (e.getSource() == exitButton) {
+            System.exit(0);
+        }
+    }
+
+    public static void main(String[] args) {
+        new RegistrationForm();
+    }
+}
+
